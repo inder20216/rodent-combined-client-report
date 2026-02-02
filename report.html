@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Run Workflow | Open Mind</title>
+
+  <style>
+    :root {
+      --primary: #6f5bd6;
+      --bg: #f4f6fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+
+      --success-bg: #ecfdf3;
+      --success-text: #027a48;
+
+      --danger-bg: #fdecea;
+      --danger-text: #b42318;
+
+      --info-bg: #eef2ff;
+      --info-text: #3730a3;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .wrapper {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    header img { height: 32px; }
+
+    .header-text h1 {
+      font-size: 16px;
+      margin: 0 0 2px 0;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .gradientText {
+      background: linear-gradient(90deg, #ff007f, #6f5bd6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 700;
+    }
+
+    .content { padding: 26px 24px; }
+
+    h2 {
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .helper {
+      color: var(--muted);
+      margin-bottom: 18px;
+      font-size: 13px;
+    }
+
+    .box {
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 16px 0;
+      font-size: 13px;
+    }
+
+    .box strong { font-weight: 700; }
+
+    .btn-row {
+      display: flex;
+      justify-content: center;
+      margin-top: 18px;
+    }
+
+    button {
+      padding: 11px 22px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover { opacity: 0.92; }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      display: none;
+      border: 1px solid transparent;
+    }
+
+    .status.show { display: block; }
+
+    .status.info {
+      background: var(--info-bg);
+      color: var(--info-text);
+      border-color: #c7d2fe;
+    }
+
+    .status.success {
+      background: var(--success-bg);
+      color: var(--success-text);
+      border-color: #86efac;
+    }
+
+    .status.error {
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      border-color: #fecaca;
+    }
+
+    footer {
+      padding: 18px 24px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <div class="card">
+
+      <header>
+        <img src="https://raw.githubusercontent.com/inder20216/openmind-assets/main/logo.png" alt="OpenMind Logo" />
+        <div class="header-text">
+          <h1>Rund to send report</h1>
+          <div class="subtitle">
+            Powered by <span class="gradientText">Open Mind Services Limited</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="content">
+        <h2>Run to send entire excel sheet to the client</h2>
+        <p class="helper">
+          Click the button below to start the workflow instantly.
+        </p>
+
+        <div class="box">
+          <strong>Note:</strong> Make sure your <strong>Excel sheet</strong> is properly updated.
+        </div>
+
+        <div class="btn-row">
+          <button id="runBtn" class="btn-primary" onclick="runWorkflow()">
+            Run Workflow
+          </button>
+        </div>
+        <div class="small">Single click will trigger n8n webhook</div>
+
+        <div id="statusBox" class="status info"></div>
+      </div>
+
+      <footer>
+        This page is intended strictly for internal use. Unauthorized access or misuse is prohibited.
+      </footer>
+
+    </div>
+  </div>
+
+  <script>
+    // ✅ Replace this with your n8n webhook URL
+    const WEBHOOK_URL = "https://inder20216.app.n8n.cloud/webhook/rodendreport";
+
+    function showStatus(type, message) {
+      const box = document.getElementById("statusBox");
+      box.className = "status show " + type;
+      box.innerText = message;
+    }
+
+    async function runWorkflow() {
+      const btn = document.getElementById("runBtn");
+
+      if (!WEBHOOK_URL || WEBHOOK_URL.includes("YOUR_WEBHOOK_URL_HERE")) {
+        showStatus("error", "Webhook URL missing. Please paste your n8n webhook in code.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "Running...";
+
+      showStatus("info", "Workflow started. Please wait...");
+
+      try {
+        const resp = await fetch(WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            source: "button",
+            triggeredAt: new Date().toISOString()
+          })
+        });
+
+        if (!resp.ok) {
+          throw new Error("HTTP " + resp.status);
+        }
+
+        // Optional: if webhook returns JSON
+        let dataText = "";
+        try {
+          const data = await resp.json();
+          dataText = data?.message ? " | " + data.message : "";
+        } catch (e) {}
+
+        showStatus("success", "✅ Workflow executed successfully!" + dataText);
+      } catch (err) {
+        showStatus("error", "❌ Workflow failed. Error: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Run Workflow";
+      }
+    }
+  </script>
+</body>
+</html>
